@@ -551,8 +551,21 @@ function renderCr(){
   const refMap={};
   [...C30,...C90].forEach(c=>{refMap[c.name+'|||'+(c.destino||'Loja')]=c;});
   const base=Object.values(aggMap).map(a=>{
-    const ref=refMap[a.name+'|||'+a.destino]||{};
-    a.format=ref.format||'';
+    // Busca refMap com fallback case-insensitive
+    const refKey=a.name+'|||'+a.destino;
+    const refKeyCI=Object.keys(refMap).find(k=>k.toLowerCase()===refKey.toLowerCase());
+    const ref=refMap[refKey]||refMap[refKeyCI]||{};
+    // Detectar formato pelo nome se refMap não tiver
+    function detectFormat(name){
+      const n=name.toLowerCase();
+      if(/tk\d/i.test(name)||n.includes('tiktok')) return 'TikTok Native';
+      if(/img\d/i.test(name)||n.includes('static')) return 'Static';
+      if(n.includes('animaç')||n.includes('animac')||n.includes('animation')||n.includes('animação')) return 'Animation';
+      if(n.startsWith('@')||n.includes('influenc')) return 'Influencer';
+      if(n.includes('ugc')||n.includes('v0')||n.includes('v1')||n.includes('v2')||n.includes('v3')||n.includes('v4')||n.includes('v5')) return 'UGC';
+      return '';
+    }
+    a.format=ref.format||detectFormat(a.name);
     a.narrative=ref.narrative||'Outros';
     a.ctr=a.impressions>0?Math.round(a.clicks/a.impressions*10000)/100:0;
     a.cpm=a.impressions>0?Math.round(a.spend/a.impressions*100000)/100:0;
