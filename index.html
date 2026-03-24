@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GÜM Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0A0A0B;--card:rgba(255,255,255,0.06);--border:rgba(255,255,255,0.1);--accent:#3b82f6;--success:#10b981;--warning:#f59e0b;--danger:#ef4444;--text:#e5e7eb;--text-dim:#9ca3af;--text-bright:#f9fafb}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.container{max-width:1400px;margin:0 auto;padding:20px}
+/* Header */
+.header{display:flex;align-items:center;justify-content:space-between;padding:24px 0;border-bottom:1px solid var(--border);margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.logo{font-size:2rem;font-weight:800;letter-spacing:2px;background:linear-gradient(135deg,var(--accent),#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.header-right{text-align:right}
+.header-title{font-size:1.1rem;font-weight:600;color:var(--text-bright)}
+.header-date{font-size:.8rem;color:var(--text-dim);margin-top:4px}
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:24px;background:rgba(255,255,255,0.04);border-radius:12px;padding:4px;width:fit-content}
+.tab{padding:10px 24px;border-radius:10px;cursor:pointer;font-size:.9rem;font-weight:500;color:var(--text-dim);transition:all .2s;border:none;background:none}
+.tab:hover{color:var(--text)}
+.tab.active{background:var(--accent);color:#fff}
+.tab-content{display:none}
+.tab-content.active{display:block}
+/* KPI Cards */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:32px}
+.kpi-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;backdrop-filter:blur(12px);transition:transform .2s}
+.kpi-card:hover{transform:translateY(-2px)}
+.kpi-label{font-size:.8rem;color:var(--text-dim);font-weight:500;text-transform:uppercase;letter-spacing:.5px}
+.kpi-value{font-size:1.8rem;font-weight:700;color:var(--text-bright);margin-top:8px}
+.kpi-sub{font-size:.78rem;color:var(--text-dim);margin-top:6px}
+/* Charts */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px}
+@media(max-width:900px){.charts-grid{grid-template-columns:1fr}}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;backdrop-filter:blur(12px)}
+.chart-title{font-size:.95rem;font-weight:600;color:var(--text-bright);margin-bottom:16px}
+/* Filters */
+.filters{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.filters label{font-size:.8rem;color:var(--text-dim);font-weight:500}
+.filters select{background:rgba(255,255,255,0.08);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:8px;font-family:'Inter',sans-serif;font-size:.85rem;cursor:pointer;outline:none}
+.filters select:focus{border-color:var(--accent)}
+/* Table */
+.table-wrap{overflow-x:auto;background:var(--card);border:1px solid var(--border);border-radius:16px;backdrop-filter:blur(12px)}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+thead th{padding:14px 16px;text-align:left;font-weight:600;color:var(--text-dim);font-size:.75rem;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+thead th:hover{color:var(--text-bright)}
+tbody tr{border-bottom:1px solid rgba(255,255,255,0.04);transition:background .15s}
+tbody tr:hover{background:rgba(255,255,255,0.04)}
+tbody tr.highlight{background:rgba(59,130,246,0.08)}
+tbody td{padding:12px 16px;white-space:nowrap}
+td.name-cell{font-weight:600;color:var(--text-bright);max-width:200px;overflow:hidden;text-overflow:ellipsis}
+/* Badges */
+.badge{display:inline-block;padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:600;letter-spacing:.3px}
+.badge-escalar{background:rgba(16,185,129,0.15);color:var(--success);border:1px solid rgba(16,185,129,0.3)}
+.badge-monitorar{background:rgba(245,158,11,0.15);color:var(--warning);border:1px solid rgba(245,158,11,0.3)}
+.badge-pausar{background:rgba(239,68,68,0.15);color:var(--danger);border:1px solid rgba(239,68,68,0.3)}
+/* Format badges */
+.fmt{display:inline-block;padding:3px 8px;border-radius:6px;font-size:.7rem;font-weight:500}
+.fmt-img{background:rgba(139,92,246,0.15);color:#a78bfa}
+.fmt-video{background:rgba(59,130,246,0.15);color:#93c5fd}
+.fmt-tiktok{background:rgba(236,72,153,0.15);color:#f9a8d4}
+.fmt-anim{background:rgba(6,182,212,0.15);color:#67e8f9}
+.fmt-other{background:rgba(255,255,255,0.08);color:var(--text-dim)}
+/* Responsive */
+@media(max-width:640px){
+  .container{padding:12px}
+  .kpi-value{font-size:1.4rem}
+  .header{flex-direction:column;align-items:flex-start}
+  .header-right{text-align:left}
+  .tabs{width:100%}
+  .tab{flex:1;text-align:center;padding:10px 12px;font-size:.82rem}
+}
+/* Sort indicators */
+th .sort-arrow{margin-left:4px;opacity:.4;font-size:.7rem}
+th.sorted .sort-arrow{opacity:1}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">GÜM</div>
+    <div class="header-right">
+      <div class="header-title">GÜM Performance Dashboard</div>
+      <div class="header-date">Atualizado: 25 Mar 2026 · Dados TiendaNube: 15–24 Mar · Meta: 90 dias</div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('overview')">Visão Geral</button>
+    <button class="tab" onclick="switchTab('creatives')">Criativos</button>
+  </div>
+
+  <!-- TAB 1: Overview -->
+  <div id="tab-overview" class="tab-content active">
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Total Pedidos</div>
+        <div class="kpi-value" id="kpi-orders"></div>
+        <div class="kpi-sub">Últimos 10 dias</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Total Receita (ARS)</div>
+        <div class="kpi-value" id="kpi-revenue"></div>
+        <div class="kpi-sub">Últimos 10 dias</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Ticket Médio</div>
+        <div class="kpi-value" id="kpi-ticket"></div>
+        <div class="kpi-sub">Receita / Pedidos</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Melhor Dia</div>
+        <div class="kpi-value" id="kpi-best"></div>
+        <div class="kpi-sub" id="kpi-best-sub"></div>
+      </div>
+    </div>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">📈 Receita por Dia (ARS)</div>
+        <canvas id="revenueChart"></canvas>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">📦 Pedidos por Dia</div>
+        <canvas id="ordersChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: Creatives -->
+  <div id="tab-creatives" class="tab-content">
+    <div class="filters">
+      <div>
+        <label>Formato</label><br>
+        <select id="filter-format" onchange="renderTable()">
+          <option value="all">Todos</option>
+          <option value="Static/Promo">Static/Promo</option>
+          <option value="TikTok Native">TikTok Native</option>
+          <option value="Animation">Animation</option>
+          <option value="UGC">UGC</option>
+          <option value="Outro">Outro</option>
+        </select>
+      </div>
+      <div>
+        <label>Narrativa</label><br>
+        <select id="filter-narrative" onchange="renderTable()">
+          <option value="all">Todas</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th onclick="sortTable('name')">Nome <span class="sort-arrow">↕</span></th>
+            <th onclick="sortTable('format')">Formato <span class="sort-arrow">↕</span></th>
+            <th onclick="sortTable('narrative')">Narrativa <span class="sort-arrow">↕</span></th>
+            <th onclick="sortTable('spend')">Spend (ARS) <span class="sort-arrow">↕</span></th>
+            <th onclick="sortTable('impressions')">Impressões <span class="sort-arrow">↕</span></th>
+            <th onclick="sortTable('ctr')">CTR <span class="sort-arrow">↕</span></th>
+            <th onclick="sortTable('purchases')">Compras <span class="sort-arrow">↕</span></th>
+            <th onclick="sortTable('roas')">ROAS <span class="sort-arrow">↕</span></th>
+            <th onclick="sortTable('cpa')">CPA (ARS) <span class="sort-arrow">↕</span></th>
+            <th onclick="sortTable('status')">Status <span class="sort-arrow">↕</span></th>
+          </tr>
+        </thead>
+        <tbody id="creative-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+// === TiendaNube Data ===
+const tiendaNube = {
+  "2026-03-15": {orders:32,revenue:2485702},
+  "2026-03-16": {orders:15,revenue:1261715},
+  "2026-03-17": {orders:15,revenue:1093734},
+  "2026-03-18": {orders:15,revenue:1251051},
+  "2026-03-19": {orders:18,revenue:1606574},
+  "2026-03-20": {orders:16,revenue:1335486},
+  "2026-03-21": {orders:10,revenue:1025178},
+  "2026-03-22": {orders:17,revenue:1584771},
+  "2026-03-23": {orders:12,revenue:964817},
+  "2026-03-24": {orders:3,revenue:233500}
+};
+
+// === Meta Creatives (all) ===
+const allCreatives = [{"name":"IMG35","spend":1279301.71,"impressions":190331,"clicks":3194,"ctr":1.678129,"purchases":85,"revenue":7696606.6,"roas":6.016256008912862,"cpa":15050.608352941175},{"name":"V33","spend":897494.23,"impressions":111848,"clicks":3921,"ctr":3.505651,"purchases":50,"revenue":3459079.53,"roas":3.854152388255465,"cpa":17949.8846},{"name":"TK01","spend":801555.08,"impressions":105941,"clicks":2995,"ctr":2.827045,"purchases":57,"revenue":5008556.81,"roas":6.248549769031468,"cpa":14062.369824561403},{"name":"Animação","spend":769604.16,"impressions":120824,"clicks":2509,"ctr":2.076574,"purchases":45,"revenue":4104465.12,"roas":5.333215870350805,"cpa":17102.31466666667},{"name":"TK02","spend":719159.83,"impressions":85995,"clicks":1775,"ctr":2.064073,"purchases":41,"revenue":3245111.75,"roas":4.512365144198891,"cpa":17540.483658536585},{"name":"Animação — LP","spend":460484.85,"impressions":76573,"clicks":1342,"ctr":1.752576,"purchases":27,"revenue":2474964.78,"roas":5.37469317394481,"cpa":17054.994444444445},{"name":"TK07","spend":398222.82,"impressions":58826,"clicks":1202,"ctr":2.043314,"purchases":27,"revenue":2227038.27,"roas":5.592442617929329,"cpa":14748.993333333334},{"name":"TK05","spend":391631.96,"impressions":61468,"clicks":1517,"ctr":2.467951,"purchases":23,"revenue":1777427.18,"roas":4.538514119225611,"cpa":17027.476521739132},{"name":"TK02 — LP","spend":289684.41,"impressions":32749,"clicks":575,"ctr":1.755779,"purchases":19,"revenue":1529407.85,"roas":5.279565614179928,"cpa":15246.547894736841},{"name":"TK03","spend":367148.36,"impressions":33598,"clicks":1164,"ctr":3.464492,"purchases":18,"revenue":1406808.45,"roas":3.8317165573066974,"cpa":20397.13111111111},{"name":"TK01 — LP","spend":303584.06,"impressions":38916,"clicks":871,"ctr":2.238154,"purchases":16,"revenue":1341006.22,"roas":4.417248455007815,"cpa":18974.00375},{"name":"IMG28","spend":326794.86,"impressions":58583,"clicks":822,"ctr":1.403137,"purchases":15,"revenue":1394018.36,"roas":4.265729148861155,"cpa":21786.324},{"name":"TK10","spend":270990.7,"impressions":22675,"clicks":512,"ctr":2.257993,"purchases":15,"revenue":1323006.42,"roas":4.8821100502710975,"cpa":18066.04666666667},{"name":"V35","spend":377018.26,"impressions":35330,"clicks":927,"ctr":2.623832,"purchases":14,"revenue":1098403.95,"roas":2.9133972184795502,"cpa":26929.875714285714},{"name":"Animação-2","spend":101628.62,"impressions":19264,"clicks":402,"ctr":2.086794,"purchases":11,"revenue":967497.26,"roas":9.519929130199742,"cpa":9238.965454545454},{"name":"IMG12","spend":195641.7,"impressions":22141,"clicks":577,"ctr":2.606025,"purchases":11,"revenue":780704.2,"roas":3.990479534782206,"cpa":17785.609090909093},{"name":"V12","spend":135366.68,"impressions":18494,"clicks":533,"ctr":2.882016,"purchases":10,"revenue":767487.3,"roas":5.669691389343376,"cpa":13536.668},{"name":"IMG19","spend":131765.93,"impressions":17634,"clicks":382,"ctr":2.16627,"purchases":10,"revenue":645862.6,"roas":4.901590266922565,"cpa":13176.592999999999},{"name":"V14","spend":294345.53,"impressions":35995,"clicks":1158,"ctr":3.217113,"purchases":9,"revenue":690497.6,"roas":2.34587425193785,"cpa":32705.058888888892},{"name":"IMG29","spend":99962.29,"impressions":22951,"clicks":337,"ctr":1.468346,"purchases":9,"revenue":720652.41,"roas":7.2092427054242165,"cpa":11106.92111111111}];
+
+// === Classification ===
+function classifyCreative(name) {
+  const n = name.trim();
+  // IMG*
+  if (/^IMG/i.test(n)) return {format:'Static/Promo', narrative:'Promoção'};
+  // TikTok native
+  if (/^TK0[1-3]|^TK05|^TK07|^TK10/i.test(n)) return {format:'TikTok Native', narrative:'Praticidade'};
+  if (/^TK/i.test(n)) return {format:'TikTok Native', narrative:'Outros'};
+  // Animation
+  if (/^Animação|^V52/i.test(n)) return {format:'Animation', narrative:'Praticidade'};
+  // UGC narratives
+  if (/^V33|^V12|^V34/i.test(n)) return {format:'UGC', narrative:'Caramelo-Taste'};
+  if (/^V32|^V49|^V67|^V74/i.test(n)) return {format:'UGC', narrative:'Verano-Persona'};
+  if (/^V14|^V55|^V06/i.test(n)) return {format:'UGC', narrative:'Polvo-vs-Gomita'};
+  if (/^V11|^V15|^V16/i.test(n)) return {format:'UGC', narrative:'Ciência'};
+  if (/^V\d/i.test(n)) return {format:'UGC', narrative:'Outros'};
+  return {format:'Outro', narrative:'—'};
+}
+
+function getStatus(roas, purchases) {
+  if (roas > 4.5 && purchases >= 20) return 'ESCALAR';
+  if (purchases === 0 || roas < 1.5) return 'PAUSAR';
+  return 'MONITORAR';
+}
+
+// Enrich creatives
+const creatives = allCreatives.map(c => {
+  const cls = classifyCreative(c.name);
+  const status = getStatus(c.roas, c.purchases);
+  return {...c, format: cls.format, narrative: cls.narrative, status};
+});
+
+// Populate narrative filter
+const narratives = [...new Set(creatives.map(c=>c.narrative))].sort();
+const narSel = document.getElementById('filter-narrative');
+narratives.forEach(n => {
+  const o = document.createElement('option');
+  o.value = n; o.textContent = n;
+  narSel.appendChild(o);
+});
+
+// === KPIs ===
+const days = Object.keys(tiendaNube).sort();
+const totalOrders = days.reduce((s,d) => s + tiendaNube[d].orders, 0);
+const totalRevenue = days.reduce((s,d) => s + tiendaNube[d].revenue, 0);
+const ticketMedio = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+let bestDay = days[0], bestRev = 0;
+days.forEach(d => { if (tiendaNube[d].revenue > bestRev) { bestRev = tiendaNube[d].revenue; bestDay = d; }});
+
+const fmtARS = n => '$' + Math.round(n).toLocaleString('es-AR');
+const fmtNum = n => n.toLocaleString('es-AR');
+const fmtDate = d => { const [,m,dd] = d.split('-'); return `${dd}/${m}`; };
+
+document.getElementById('kpi-orders').textContent = totalOrders;
+document.getElementById('kpi-revenue').textContent = fmtARS(totalRevenue);
+document.getElementById('kpi-ticket').textContent = fmtARS(ticketMedio);
+document.getElementById('kpi-best').textContent = fmtDate(bestDay);
+document.getElementById('kpi-best-sub').textContent = `${tiendaNube[bestDay].orders} pedidos · ${fmtARS(tiendaNube[bestDay].revenue)}`;
+
+// === Charts ===
+const labels = days.map(fmtDate);
+const revData = days.map(d => tiendaNube[d].revenue);
+const ordData = days.map(d => tiendaNube[d].orders);
+
+Chart.defaults.color = '#9ca3af';
+Chart.defaults.borderColor = 'rgba(255,255,255,0.06)';
+
+new Chart(document.getElementById('revenueChart'), {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [{
+      label: 'Receita (ARS)',
+      data: revData,
+      borderColor: '#3b82f6',
+      backgroundColor: 'rgba(59,130,246,0.1)',
+      fill: true,
+      tension: 0.4,
+      pointBackgroundColor: '#3b82f6',
+      pointRadius: 5,
+      pointHoverRadius: 7,
+      borderWidth: 2.5
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {display: false},
+      tooltip: {
+        callbacks: {
+          label: ctx => 'ARS ' + Math.round(ctx.raw).toLocaleString('es-AR')
+        }
+      }
+    },
+    scales: {
+      y: {
+        ticks: {callback: v => (v/1e6).toFixed(1)+'M'},
+        grid: {color:'rgba(255,255,255,0.04)'}
+      },
+      x: {grid: {display: false}}
+    }
+  }
+});
+
+new Chart(document.getElementById('ordersChart'), {
+  type: 'bar',
+  data: {
+    labels,
+    datasets: [{
+      label: 'Pedidos',
+      data: ordData,
+      backgroundColor: ordData.map(v => v >= 20 ? 'rgba(16,185,129,0.6)' : v >= 10 ? 'rgba(59,130,246,0.6)' : 'rgba(239,68,68,0.5)'),
+      borderRadius: 6,
+      borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {legend: {display: false}},
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {stepSize: 5},
+        grid: {color:'rgba(255,255,255,0.04)'}
+      },
+      x: {grid: {display: false}}
+    }
+  }
+});
+
+// === Tab Switch ===
+function switchTab(tab) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// === Table ===
+let sortKey = 'purchases', sortAsc = false;
+
+function sortTable(key) {
+  if (sortKey === key) sortAsc = !sortAsc;
+  else { sortKey = key; sortAsc = false; }
+  renderTable();
+}
+
+function fmtBadge(format) {
+  const map = {'Static/Promo':'fmt-img','TikTok Native':'fmt-tiktok','Animation':'fmt-anim','UGC':'fmt-video','Outro':'fmt-other'};
+  return `<span class="fmt ${map[format]||'fmt-other'}">${format}</span>`;
+}
+
+function fmtStatus(status) {
+  const map = {'ESCALAR':'badge-escalar','MONITORAR':'badge-monitorar','PAUSAR':'badge-pausar'};
+  return `<span class="badge ${map[status]}">${status}</span>`;
+}
+
+function renderTable() {
+  const fFmt = document.getElementById('filter-format').value;
+  const fNar = document.getElementById('filter-narrative').value;
+  let data = creatives.filter(c => {
+    if (fFmt !== 'all' && c.format !== fFmt) return false;
+    if (fNar !== 'all' && c.narrative !== fNar) return false;
+    return true;
+  });
+  data.sort((a,b) => {
+    let va = a[sortKey], vb = b[sortKey];
+    if (typeof va === 'string') { va = va.toLowerCase(); vb = vb.toLowerCase(); }
+    if (va < vb) return sortAsc ? -1 : 1;
+    if (va > vb) return sortAsc ? 1 : -1;
+    return 0;
+  });
+
+  const tbody = document.getElementById('creative-tbody');
+  tbody.innerHTML = data.map(c => {
+    const hl = c.roas > 5 ? ' class="highlight"' : '';
+    return `<tr${hl}>
+      <td class="name-cell" title="${c.name}">${c.name}</td>
+      <td>${fmtBadge(c.format)}</td>
+      <td>${c.narrative}</td>
+      <td>${fmtARS(c.spend)}</td>
+      <td>${fmtNum(c.impressions)}</td>
+      <td>${c.ctr.toFixed(2)}%</td>
+      <td style="font-weight:700;color:var(--text-bright)">${c.purchases}</td>
+      <td style="color:${c.roas>=4.5?'var(--success)':c.roas>=2?'var(--warning)':'var(--danger)'};font-weight:600">${c.roas.toFixed(2)}x</td>
+      <td>${c.cpa > 0 ? fmtARS(c.cpa) : '—'}</td>
+      <td>${fmtStatus(c.status)}</td>
+    </tr>`;
+  }).join('');
+}
+
+renderTable();
+</script>
+</body>
+</html>
