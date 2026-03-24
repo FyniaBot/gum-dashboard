@@ -268,14 +268,15 @@ input[type=date]{padding:4px 8px;border-radius:5px;border:1px solid rgba(255,255
           <th onclick="sortCr(3)">Narrativa</th>
           <th onclick="sortCr(4)">Spend (ARS)</th>
           <th onclick="sortCr(5)">CPM (ARS)</th>
-          <th onclick="sortCr(6)">CTR%</th>
-          <th onclick="sortCr(7)">Hook%</th>
-          <th onclick="sortCr(8)">Hold 25%</th>
-          <th onclick="sortCr(9)">Hold 50%</th>
-          <th onclick="sortCr(10)">Compras</th>
-          <th onclick="sortCr(11)">Receita (ARS)</th>
-          <th onclick="sortCr(12)">ROAS</th>
-          <th onclick="sortCr(13)">CPA (ARS)</th>
+          <th onclick="sortCr(6)">CPC (ARS)</th>
+          <th onclick="sortCr(7)">CTR%</th>
+          <th onclick="sortCr(8)">Hook%</th>
+          <th onclick="sortCr(9)">Hold 25%</th>
+          <th onclick="sortCr(10)">Hold 50%</th>
+          <th onclick="sortCr(11)">Compras</th>
+          <th onclick="sortCr(12)">Receita (ARS)</th>
+          <th onclick="sortCr(13)">ROAS</th>
+          <th onclick="sortCr(14)">CPA (ARS)</th>
           <th>Status</th>
         </tr></thead>
         <tbody id="cr-tbody"></tbody>
@@ -560,6 +561,7 @@ function renderCr(){
     a.hold_50=a.impressions>0?Math.round(a.p50/a.impressions*1000)/10:0;
     a.roas=a.spend>0?Math.round(a.revenue/a.spend*100)/100:0;
     a.cpa=a.purchases>0?Math.round(a.spend/a.purchases):0;
+    a.cpc=a.clicks>0?Math.round(a.spend/a.clicks*100)/100:0;
     a.status=a.roas>=4.5&&a.purchases>=20?'ESCALAR':a.roas<2.5||a.purchases===0?'PAUSAR':'MONITORAR';
     return a;
   });
@@ -582,7 +584,7 @@ function renderCr(){
   });
 
   data.sort((a,b)=>{
-    const fns=[c=>c.name,c=>c.destino,c=>c.format,c=>c.narrative,c=>c.spend,c=>c.cpm,c=>c.ctr,c=>c.hook_rate,c=>c.hold_25,c=>c.hold_50,c=>c.purchases,c=>c.revenue,c=>c.roas,c=>c.cpa];
+    const fns=[c=>c.name,c=>c.destino,c=>c.format,c=>c.narrative,c=>c.spend,c=>c.cpm,c=>c.cpc,c=>c.ctr,c=>c.hook_rate,c=>c.hold_25,c=>c.hold_50,c=>c.purchases,c=>c.revenue,c=>c.roas,c=>c.cpa];
     const fn=fns[crSortCol]||fns[10];
     const av=fn(a),bv=fn(b);
     return typeof av==='string'?av.localeCompare(bv)*crSortDir:(av-bv)*crSortDir;
@@ -607,6 +609,7 @@ function renderCr(){
       <td style="color:#9ca3af;font-size:11px">${c.narrative}</td>
       <td>${fARS(c.spend)}</td>
       <td>${fARS(c.cpm)}</td>
+      <td>${c.cpc>0?fARS(c.cpc):'—'}</td>
       <td>${c.ctr}%</td>
       <td style="color:${hookC}">${isVid?(c.hook_rate>0?c.hook_rate+'%':'—'):'N/A'}</td>
       <td style="color:${hold25C}">${isVid?(c.hold_25>0?c.hold_25+'%':'—'):'N/A'}</td>
@@ -624,9 +627,10 @@ function renderCr(){
   const tr=tot.spend>0?tot.revenue/tot.spend:0;
   const tc=tot.purchases>0?tot.spend/tot.purchases:0;
   const avgCPM=tot.impressions>0?tot.spend/tot.impressions*1000:0;
+  const avgCPC=tot.clicks>0?tot.spend/tot.clicks:0;
   document.getElementById('cr-tfoot').innerHTML=`<tr class="tfoot-row">
     <td colspan="4">TOTAL (${data.length} criativos)</td>
-    <td>${fARS(tot.spend)}</td><td>${fARS(avgCPM)}</td>
+    <td>${fARS(tot.spend)}</td><td>${fARS(avgCPM)}</td><td>${fARS(avgCPC)}</td>
     <td colspan="4">—</td>
     <td style="font-weight:700">${tot.purchases}</td>
     <td style="color:#10b981">${fARS(tot.revenue)}</td>
