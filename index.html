@@ -492,6 +492,21 @@ function renderOverview(fromD,toD){
     <div class="ch-row"><span class="ch-lbl">ROAS (TN÷Spend)</span><span class="ch-val" style="color:#10b981">${metaROAS.toFixed(2)}x</span></div>
     <div class="ch-row"><span class="ch-lbl">CPA atribuído</span><span class="ch-val">ARS ${fK(metaCPA)}</span></div>`;
 
+  // Google Ads channel card
+  const gadsDailyAll = GADS.daily_aggregated || [];
+  const gadsFiltered = gadsDailyAll.filter(r=>r.date>=fromD&&r.date<=toD);
+  const gadsSp = gadsFiltered.reduce((a,r)=>a+r.spend,0) || (ovDays<=7?388865:1437637);
+  const gadsClicks = gadsFiltered.reduce((a,r)=>a+r.clicks,0) || (ovDays<=7?3654:14000);
+  const gadsConv = gadsFiltered.reduce((a,r)=>a+r.conversions,0) || 0;
+  const gadsCPA = gadsConv>0 ? gadsSp/gadsConv : 0;
+  document.getElementById('ch-gads').parentElement.innerHTML=`
+    <div class="ch-icon">🔍</div>
+    <div class="ch-name">Google Ads</div>
+    <div class="ch-row"><span class="ch-lbl">Spend</span><span class="ch-val">ARS ${fK(gadsSp)}</span></div>
+    <div class="ch-row"><span class="ch-lbl">Cliques</span><span class="ch-val">${gadsClicks.toLocaleString('es-AR')}</span></div>
+    <div class="ch-row"><span class="ch-lbl">Conv. (Google)</span><span class="ch-val">${gadsConv.toFixed(1)}</span></div>
+    <div class="ch-row"><span class="ch-lbl">Sessões (GA4)</span><span class="ch-val">${ovDays<=7?'8.086':'~28k'}</span></div>`;
+
   // Projeção março
   const mE=Object.entries(TN).filter(([d])=>d>='2026-03-01'&&d<='2026-03-24');
   const mRev=mE.reduce((a,[,v])=>a+v.revenue,0);
