@@ -119,15 +119,15 @@
 
 <!-- SLIDE 2: A CRISE -->
 <div class="slide">
-  <div class="eyebrow">O cenário atual</div>
-  <h2 class="headline" style="font-size:clamp(28px,3.5vw,52px)">O Meta está instável.<br>Todo mundo está sentindo.</h2>
-  <div class="stat-row">
-    <div class="stat"><div class="val">↑ CPM</div><div class="lbl">Leilão mais caro sem motivo aparente</div></div>
-    <div class="stat"><div class="val">↓ ROAS</div><div class="lbl">Campanhas que funcionavam pararam</div></div>
-    <div class="stat"><div class="val">😰</div><div class="lbl">Desespero → decisões erradas</div></div>
-  </div>
+  <div class="eyebrow">O padrão que se repete</div>
+  <h2 class="headline" style="font-size:clamp(28px,3.5vw,52px)">ROAS cai.<br>Desespero entra.<br><span class="accent">Decisões erradas saem.</span></h2>
   <div class="highlight" style="margin-top:40px">
-    <p>O maior erro não é o ROAS baixo.<br>É <strong>não saber o que está causando</strong> o ROAS baixo.</p>
+    <p>O maior erro não é o ROAS baixo.<br>É <strong>não saber o que está causando</strong> o ROAS baixo — e agir no lugar errado.</p>
+  </div>
+  <div class="cards cols-3" style="margin-top:28px">
+    <div class="card red"><div class="icon">🔇</div><div class="ctitle">Pausa tudo</div><div class="ctext">Mata o aprendizado acumulado do algoritmo.</div></div>
+    <div class="card red"><div class="icon">🔁</div><div class="ctitle">Cria campanha nova</div><div class="ctext">Recomeça do zero sem entender o problema.</div></div>
+    <div class="card red"><div class="icon">💸</div><div class="ctitle">Aumenta orçamento</div><div class="ctext">Escala o problema em vez de resolver.</div></div>
   </div>
 </div>
 
@@ -154,39 +154,29 @@
 <!-- SLIDE 4: COMO DIAGNOSTICAR -->
 <div class="slide">
   <div class="eyebrow">Diagnóstico rápido</div>
-  <h2 class="headline" style="font-size:clamp(24px,3vw,44px);margin-bottom:8px">Como saber qual é o seu caso</h2>
-  <table class="tbl">
-    <thead><tr><th>Sinal</th><th>Sazonalidade</th><th>Problema único</th></tr></thead>
-    <tbody>
-      <tr>
-        <td>CTR do anúncio</td>
-        <td><span class="tag-green">Estável</span></td>
-        <td><span class="tag-red">Caindo</span></td>
-      </tr>
-      <tr>
-        <td>CPM</td>
-        <td><span class="tag-amber">Subiu em todo mundo</span></td>
-        <td><span class="tag-red">Subiu só em você</span></td>
-      </tr>
-      <tr>
-        <td>Taxa de conversão do site</td>
-        <td><span class="tag-green">Igual ao normal</span></td>
-        <td><span class="tag-red">Caiu junto</span></td>
-      </tr>
-      <tr>
-        <td>Outros no seu nicho</td>
-        <td><span class="tag-amber">Também reclamando</span></td>
-        <td><span class="tag-green">Seguindo normais</span></td>
-      </tr>
-      <tr>
-        <td>Mesmo período ano passado</td>
-        <td><span class="tag-amber">Também foi fraco</span></td>
-        <td><span class="tag-green">Era normal ou bom</span></td>
-      </tr>
-    </tbody>
-  </table>
-  <div class="highlight" style="padding:16px 24px;margin-top:20px">
-    <p style="font-size:15px"><strong>Regra rápida:</strong> CTR estável + CPA subiu = mercado. CTR caiu + CPA subiu = problema seu.</p>
+  <h2 class="headline" style="font-size:clamp(24px,3vw,40px);margin-bottom:16px">Faça essas perguntas antes de mexer em qualquer coisa</h2>
+  <div class="cards cols-2" style="max-width:980px;margin-top:0">
+    <div class="card amber">
+      <div class="col-title amber" style="margin-bottom:12px">🌊 Aponta para Sazonalidade se...</div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+        <li style="font-size:13px;color:rgba(255,255,255,.75);padding-left:16px;border-left:2px solid rgba(245,158,11,.4)">Outros do seu nicho também estão reclamando</li>
+        <li style="font-size:13px;color:rgba(255,255,255,.75);padding-left:16px;border-left:2px solid rgba(245,158,11,.4)">CPM subiu mas o seu <strong style="color:#fff">CTR se manteve estável</strong></li>
+        <li style="font-size:13px;color:rgba(255,255,255,.75);padding-left:16px;border-left:2px solid rgba(245,158,11,.4)">Taxa de conversão do site está igual ao normal</li>
+        <li style="font-size:13px;color:rgba(255,255,255,.75);padding-left:16px;border-left:2px solid rgba(245,158,11,.4)">O mesmo período no ano passado também foi fraco</li>
+      </ul>
+    </div>
+    <div class="card purple">
+      <div class="col-title purple" style="margin-bottom:12px">🔍 Aponta para Problema da Marca se...</div>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+        <li style="font-size:13px;color:rgba(255,255,255,.75);padding-left:16px;border-left:2px solid rgba(168,85,247,.4)">Concorrentes no seu nicho estão estáveis</li>
+        <li style="font-size:13px;color:rgba(255,255,255,.75);padding-left:16px;border-left:2px solid rgba(168,85,247,.4)">Seu <strong style="color:#fff">CTR caiu junto com o ROAS</strong></li>
+        <li style="font-size:13px;color:rgba(255,255,255,.75);padding-left:16px;border-left:2px solid rgba(168,85,247,.4)">Taxa de conversão do site também caiu</li>
+        <li style="font-size:13px;color:rgba(255,255,255,.75);padding-left:16px;border-left:2px solid rgba(168,85,247,.4)">Houve mudança recente (frete, preço, criativo, produto)</li>
+      </ul>
+    </div>
+  </div>
+  <div class="highlight" style="padding:14px 24px;margin-top:20px">
+    <p style="font-size:15px"><strong>Regra rápida:</strong> CTR estável + CPA subiu = mercado. CTR caiu + CPA subiu = problema da sua marca.</p>
   </div>
 </div>
 
@@ -257,14 +247,14 @@
       <div style="flex:1">
         <div class="funnel-bar" style="background:rgba(245,158,11,.4);width:70%">Abandono de página</div>
       </div>
-      <div class="funnel-gap" style="color:#f59e0b;width:220px;font-size:12px">→ Foto/copy ruim, preço, frete oculto</div>
+      <div class="funnel-gap" style="color:#f59e0b;width:240px;font-size:12px">→ Oferta fraca, foto/copy ruim, preço sem ancoragem, frete oculto</div>
     </div>
     <div class="funnel-step">
       <div class="funnel-label">Checkout → Compra</div>
       <div style="flex:1">
         <div class="funnel-bar" style="background:rgba(239,68,68,.4);width:55%">Abandono de carrinho</div>
       </div>
-      <div class="funnel-gap" style="color:#ef4444;width:220px;font-size:12px">→ Frete surpresa, poucas opções de pagamento</div>
+      <div class="funnel-gap" style="color:#ef4444;width:240px;font-size:12px">→ Oferta sem diferencial, frete surpresa, poucas formas de pagamento</div>
     </div>
   </div>
   <div class="highlight" style="padding:14px 24px;margin-top:20px">
