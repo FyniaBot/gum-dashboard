@@ -463,9 +463,9 @@ function renderOverview(fromD,toD){
   const totRev=revenues.reduce((a,b)=>a+b,0);
   const totOrd=orders.reduce((a,b)=>a+b,0);
   const totMetaSpend=spends.reduce((a,b)=>a+b,0);
-  // Google Ads spend pro-rated for selected period
-  const gadsSpend30d=1437637; const gadsSpend7d=388865;
-  const gadsSpend=ovDays<=7?gadsSpend7d:Math.round(gadsSpend30d*(ovDays/30));
+  // Google Ads spend real para o período selecionado
+  const gadsDailyLookup=Object.fromEntries((GADS.daily_aggregated||[]).map(r=>[r.date,r.spend||0]));
+  const gadsSpend=tnE.reduce((a,[d])=>a+(gadsDailyLookup[d]||0),0);
   const totSpend=totMetaSpend+gadsSpend;
   const roas=totSpend>0?totRev/totSpend:0;
   const cpa=totOrd>0?totSpend/totOrd:0;
@@ -492,20 +492,24 @@ function renderOverview(fromD,toD){
     <div class="ch-row"><span class="ch-lbl">ROAS (TN÷Spend)</span><span class="ch-val" style="color:#10b981">${metaROAS.toFixed(2)}x</span></div>
     <div class="ch-row"><span class="ch-lbl">CPA atribuído</span><span class="ch-val">ARS ${fK(metaCPA)}</span></div>`;
 
-  // Google Ads channel card
+  // Google Ads channel card — spend real do período, GA4 UTM para tx/receita
   const gadsDailyAll = GADS.daily_aggregated || [];
   const gadsFiltered = gadsDailyAll.filter(r=>r.date>=fromD&&r.date<=toD);
-  const gadsSp = gadsFiltered.reduce((a,r)=>a+r.spend,0) || (ovDays<=7?388865:1437637);
-  const gadsClicks = gadsFiltered.reduce((a,r)=>a+r.clicks,0) || (ovDays<=7?3654:14000);
-  const gadsConv = gadsFiltered.reduce((a,r)=>a+r.conversions,0) || 0;
-  const gadsCPA = gadsConv>0 ? gadsSp/gadsConv : 0;
+  const gadsSp = gadsFiltered.reduce((a,r)=>a+r.spend,0);
+  const gadsClicks = gadsFiltered.reduce((a,r)=>a+r.clicks,0);
+  // GA4 UTM: transações e receita atribuídas ao Google no período
+  const gadsUtm = UTM_DAILY.rows.filter(r=>r.date>=fromD&&r.date<=toD&&(r.source||'').toLowerCase().includes('google'));
+  const gadsTx = gadsUtm.reduce((a,r)=>a+(r.transactions||0),0);
+  const gadsRev = gadsUtm.reduce((a,r)=>a+(r.revenue||0),0);
+  const gadsROAS = gadsSp>0 && gadsRev>0 ? (gadsRev/gadsSp).toFixed(2) : '—';
+  const gadsCPA = gadsTx>0 && gadsSp>0 ? Math.round(gadsSp/gadsTx) : 0;
   document.getElementById('ch-gads').parentElement.innerHTML=`
     <div class="ch-icon">🔍</div>
     <div class="ch-name">Google Ads</div>
     <div class="ch-row"><span class="ch-lbl">Spend</span><span class="ch-val">ARS ${fK(gadsSp)}</span></div>
-    <div class="ch-row"><span class="ch-lbl">Cliques</span><span class="ch-val">${gadsClicks.toLocaleString('es-AR')}</span></div>
-    <div class="ch-row"><span class="ch-lbl">Conv. (Google)</span><span class="ch-val">${gadsConv.toFixed(1)}</span></div>
-    <div class="ch-row"><span class="ch-lbl">Sessões (GA4)</span><span class="ch-val">${ovDays<=7?'8.086':'~28k'}</span></div>`;
+    <div class="ch-row"><span class="ch-lbl">Compras (atrib. GA4)</span><span class="ch-val">${gadsTx}</span></div>
+    <div class="ch-row"><span class="ch-lbl">ROAS (GA4÷Spend)</span><span class="ch-val" style="color:#10b981">${gadsROAS}x</span></div>
+    <div class="ch-row"><span class="ch-lbl">CPA atribuído</span><span class="ch-val">${gadsCPA>0?'ARS '+fK(gadsCPA):'—'}</span></div>`;
 
   // Projeção março
   const mE=Object.entries(TN).filter(([d])=>d>='2026-03-01'&&d<='2026-03-24');
@@ -547,11 +551,17 @@ function renderFunnel(fromD,toD){
   if(fromD&&toD)rows=FUNNEL.filter(r=>r.date>=fromD&&r.date<=toD).sort((a,b)=>b.date.localeCompare(a.date));
   else rows=[...FUNNEL].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,fnDays);
 
+  // Build Google Ads daily lookup
+  const gadsDaily=Object.fromEntries((GADS.daily_aggregated||[]).map(r=>[r.date,r.spend||0]));
+
   const t=rows.reduce((a,r)=>{
-    a.spend+=r.spend;a.impressions+=r.impressions;a.clicks+=r.clicks;
+    const gadsDaySpend=gadsDaily[r.date]||0;
+    a.spend+=r.spend;a.gads_spend+=gadsDaySpend;
+    a.impressions+=r.impressions;a.clicks+=r.clicks;
     a.sessions+=(r.sessions||0);a.ga4_checkouts+=(r.ga4_checkouts||0);
     a.orders+=r.orders;a.revenue+=r.revenue;return a;
-  },{spend:0,impressions:0,clicks:0,sessions:0,ga4_checkouts:0,orders:0,revenue:0});
+  },{spend:0,gads_spend:0,impressions:0,clicks:0,sessions:0,ga4_checkouts:0,orders:0,revenue:0});
+  t.total_spend=t.spend+t.gads_spend;
 
   // Funil visual
   const vis=document.getElementById('fn-vis');
@@ -586,19 +596,19 @@ function renderFunnel(fromD,toD){
     vis.appendChild(div);
   });
 
-  // CPS totals
-  const roas=t.revenue/t.spend;
-  const cpa=t.spend/t.orders;
-  const cps=t.sessions>0?t.spend/t.sessions:0;
+  // CPS totals — usando total_spend (Meta + Google)
+  const roas=t.total_spend>0?t.revenue/t.total_spend:0;
+  const cpa=t.orders>0?t.total_spend/t.orders:0;
+  const cps=t.sessions>0?t.total_spend/t.sessions:0;
   
   // Adicionar métricas resumo
   const sum=document.createElement('div');
   sum.style.cssText='display:flex;gap:20px;flex-wrap:wrap;margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.07)';
   const metrics=[
     {l:'ROAS Real',v:roas.toFixed(2)+'x',c:'#10b981'},
-    {l:'CPA',v:'ARS '+fK(cpa),c:'#f9fafb'},
-    {l:'CPS (Custo/Sessão)',v:'ARS '+fK(cps),c:'#6366f1'},
-    {l:'CTR',v:pct(t.clicks,t.impressions),c:'#60a5fa'},
+    {l:'Spend Meta',v:'ARS '+fK(t.spend),c:'#6b7280'},
+    {l:'Spend Google',v:'ARS '+fK(t.gads_spend),c:'#6b7280'},
+    {l:'CPA (Meta+Google)',v:'ARS '+fK(cpa),c:'#f9fafb'},
     {l:'Conv. Checkout→Compra',v:pct(t.orders,t.ga4_checkouts),c:'#10b981'},
   ];
   metrics.forEach(m=>{
