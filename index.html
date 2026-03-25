@@ -126,10 +126,10 @@ input[type=date]{padding:4px 8px;border-radius:5px;border:1px solid rgba(255,255
         <div class="ch-icon">📘</div>
         <div class="ch-name">Meta Ads</div>
       </div>
-      <div class="ch-card">
+      <div class="ch-card" id="ch-card-gads">
         <div class="ch-icon">🔍</div>
         <div class="ch-name">Google Ads</div>
-        <div class="ch-value" id="ch-gads">ARS 388.865</div>
+        <div class="ch-value">ARS 388.865</div>
         <div style="font-size:10px;color:#888">spend 7d · 3 campanhas</div>
       </div>
       <div class="ch-card">
@@ -503,7 +503,7 @@ function renderOverview(fromD,toD){
   const gadsRev = gadsUtm.reduce((a,r)=>a+(r.revenue||0),0);
   const gadsROAS = gadsSp>0 && gadsRev>0 ? (gadsRev/gadsSp).toFixed(2) : '—';
   const gadsCPA = gadsTx>0 && gadsSp>0 ? Math.round(gadsSp/gadsTx) : 0;
-  document.getElementById('ch-gads').parentElement.innerHTML=`
+  document.getElementById('ch-card-gads').innerHTML=`
     <div class="ch-icon">🔍</div>
     <div class="ch-name">Google Ads</div>
     <div class="ch-row"><span class="ch-lbl">Spend</span><span class="ch-val">ARS ${fK(gadsSp)}</span></div>
