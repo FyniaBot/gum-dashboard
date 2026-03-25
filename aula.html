@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OP8D — Gestão de Crise de ROAS</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Inter',sans-serif;background:#080808;color:#f0f0f0;overflow:hidden;height:100vh;width:100vw}
+
+  .deck{width:100vw;height:100vh;position:relative}
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;align-items:center;padding:60px 80px;opacity:0;transition:opacity .35s ease}
+  .slide.active{display:flex;opacity:1}
+
+  /* Nav */
+  .nav{position:fixed;bottom:32px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:100}
+  .dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.2);cursor:pointer;transition:all .3s}
+  .dot.active{background:#fff;transform:scale(1.3)}
+  .progress{position:fixed;top:0;left:0;height:2px;background:linear-gradient(90deg,#6366f1,#a855f7);transition:width .4s ease;z-index:100}
+  .slide-num{position:fixed;top:24px;right:32px;font-size:12px;color:rgba(255,255,255,.3);font-weight:500;letter-spacing:1px}
+  .keys{position:fixed;bottom:32px;right:32px;font-size:11px;color:rgba(255,255,255,.2)}
+
+  /* Typography */
+  .eyebrow{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#6366f1;margin-bottom:16px}
+  .headline{font-size:clamp(36px,5vw,72px);font-weight:800;line-height:1.1;text-align:center;max-width:900px}
+  .headline .accent{background:linear-gradient(135deg,#6366f1,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .headline .white{color:#fff}
+  .sub{font-size:clamp(16px,2vw,22px);color:rgba(255,255,255,.55);text-align:center;max-width:700px;margin-top:20px;line-height:1.6;font-weight:400}
+  .quote{font-size:clamp(20px,2.5vw,32px);font-style:italic;text-align:center;max-width:800px;color:#fff;line-height:1.5;font-weight:300}
+  .quote em{color:#a855f7;font-style:normal;font-weight:600}
+
+  /* Cards */
+  .cards{display:grid;gap:16px;width:100%;max-width:1000px;margin-top:32px}
+  .cards.cols-2{grid-template-columns:1fr 1fr}
+  .cards.cols-3{grid-template-columns:1fr 1fr 1fr}
+  .card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:24px}
+  .card .icon{font-size:28px;margin-bottom:12px}
+  .card .ctitle{font-size:14px;font-weight:700;color:#fff;margin-bottom:8px;letter-spacing:.3px}
+  .card .ctext{font-size:13px;color:rgba(255,255,255,.55);line-height:1.6}
+  .card.green{border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.05)}
+  .card.red{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.05)}
+  .card.purple{border-color:rgba(99,102,241,.3);background:rgba(99,102,241,.05)}
+  .card.amber{border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.05)}
+
+  /* Table */
+  .tbl{width:100%;max-width:900px;border-collapse:collapse;margin-top:24px;font-size:14px}
+  .tbl th{text-align:left;padding:10px 16px;color:rgba(255,255,255,.4);font-weight:600;font-size:11px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid rgba(255,255,255,.08)}
+  .tbl td{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.05);color:rgba(255,255,255,.8);vertical-align:top;line-height:1.5}
+  .tbl tr:last-child td{border-bottom:none}
+  .tbl tr:hover td{background:rgba(255,255,255,.02)}
+  .tag-green{background:rgba(16,185,129,.15);color:#10b981;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+  .tag-red{background:rgba(239,68,68,.15);color:#ef4444;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+  .tag-amber{background:rgba(245,158,11,.15);color:#f59e0b;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+
+  /* List */
+  .list{list-style:none;max-width:800px;width:100%;margin-top:24px}
+  .list li{padding:14px 20px;border-left:3px solid rgba(99,102,241,.4);margin-bottom:10px;background:rgba(255,255,255,.03);border-radius:0 10px 10px 0;font-size:15px;color:rgba(255,255,255,.8);line-height:1.5}
+  .list li strong{color:#fff}
+  .list.do li{border-left-color:rgba(16,185,129,.5)}
+  .list.dont li{border-left-color:rgba(239,68,68,.5)}
+  .list.dont li::before{content:'✕  ';color:#ef4444;font-weight:700}
+  .list.do li::before{content:'✓  ';color:#10b981;font-weight:700}
+
+  /* Funnel */
+  .funnel{display:flex;flex-direction:column;align-items:center;gap:0;width:100%;max-width:750px;margin-top:24px}
+  .funnel-step{display:flex;align-items:center;width:100%;gap:16px;margin-bottom:4px}
+  .funnel-bar{height:44px;border-radius:8px;display:flex;align-items:center;padding:0 20px;font-weight:600;font-size:14px;color:#fff;transition:width .5s}
+  .funnel-arrow{text-align:center;font-size:18px;color:rgba(255,255,255,.2);margin:2px 0;padding-left:8px}
+  .funnel-label{font-size:13px;color:rgba(255,255,255,.5);width:160px;text-align:right;flex-shrink:0}
+  .funnel-gap{font-size:12px;color:#ef4444;font-weight:600;margin-left:8px}
+
+  /* Two col layout */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:32px;width:100%;max-width:1100px;align-items:start;margin-top:24px}
+  .col-title{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.08)}
+  .col-title.green{color:#10b981}
+  .col-title.red{color:#ef4444}
+
+  /* Big stat */
+  .stat-row{display:flex;gap:32px;margin-top:32px;flex-wrap:wrap;justify-content:center}
+  .stat{text-align:center}
+  .stat .val{font-size:clamp(32px,5vw,64px);font-weight:800;background:linear-gradient(135deg,#6366f1,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .stat .lbl{font-size:13px;color:rgba(255,255,255,.4);margin-top:4px;font-weight:500}
+
+  /* Title slide */
+  .slide-title{background:radial-gradient(ellipse at 60% 0%, rgba(99,102,241,.12) 0%, transparent 60%)}
+
+  /* Divider */
+  .divider{width:60px;height:3px;background:linear-gradient(90deg,#6366f1,#a855f7);border-radius:2px;margin:20px auto}
+
+  /* Section header */
+  .section-label{position:fixed;top:24px;left:32px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.2)}
+
+  /* Highlight box */
+  .highlight{background:linear-gradient(135deg,rgba(99,102,241,.12),rgba(168,85,247,.08));border:1px solid rgba(99,102,241,.3);border-radius:16px;padding:24px 32px;max-width:800px;margin-top:24px;text-align:center}
+  .highlight p{font-size:18px;line-height:1.6;color:rgba(255,255,255,.85);font-style:italic}
+  .highlight strong{color:#a855f7;font-style:normal}
+
+  /* Op8d logo area */
+  .brand{font-size:12px;font-weight:700;letter-spacing:3px;color:rgba(255,255,255,.2);text-transform:uppercase;position:fixed;top:24px;left:32px}
+</style>
+</head>
+<body>
+<div class="progress" id="prog"></div>
+<div class="slide-num" id="snum"></div>
+<div class="brand">OP8D · Pietro Pasqualini</div>
+<div class="keys">← → para navegar</div>
+
+<div class="deck" id="deck">
+
+<!-- SLIDE 1: CAPA -->
+<div class="slide slide-title active">
+  <div class="eyebrow">Operação 8 Dígitos · Aula ao Vivo</div>
+  <h1 class="headline"><span class="accent">ROAS caiu.</span><br><span class="white">É a sua loja<br>ou é o mercado?</span></h1>
+  <div class="divider"></div>
+  <p class="sub">A pergunta que define tudo — e os dois planos de ação para cada resposta.</p>
+</div>
+
+<!-- SLIDE 2: A CRISE -->
+<div class="slide">
+  <div class="eyebrow">O cenário atual</div>
+  <h2 class="headline" style="font-size:clamp(28px,3.5vw,52px)">O Meta está instável.<br>Todo mundo está sentindo.</h2>
+  <div class="stat-row">
+    <div class="stat"><div class="val">↑ CPM</div><div class="lbl">Leilão mais caro sem motivo aparente</div></div>
+    <div class="stat"><div class="val">↓ ROAS</div><div class="lbl">Campanhas que funcionavam pararam</div></div>
+    <div class="stat"><div class="val">😰</div><div class="lbl">Desespero → decisões erradas</div></div>
+  </div>
+  <div class="highlight" style="margin-top:40px">
+    <p>O maior erro não é o ROAS baixo.<br>É <strong>não saber o que está causando</strong> o ROAS baixo.</p>
+  </div>
+</div>
+
+<!-- SLIDE 3: A PERGUNTA -->
+<div class="slide">
+  <div class="eyebrow">Antes de mexer em qualquer coisa</div>
+  <p class="quote">O problema é <em>exclusivo do seu e-commerce</em><br>ou é <em>sazonalidade / mercado</em>?</p>
+  <div class="divider"></div>
+  <p class="sub">A resposta muda tudo — o diagnóstico, o plano de ação e o que você NÃO deve fazer.</p>
+  <div class="cards cols-2" style="max-width:700px;margin-top:32px">
+    <div class="card amber">
+      <div class="icon">🌊</div>
+      <div class="ctitle">Sazonalidade / Mercado</div>
+      <div class="ctext">Todo mundo sofre junto. CPM sobe sem você mudar nada. O mercado não está comprando agora.</div>
+    </div>
+    <div class="card purple">
+      <div class="icon">🔍</div>
+      <div class="ctitle">Problema único do seu e-commerce</div>
+      <div class="ctext">Só você caiu. Algo mudou na sua loja, criativo ou audiência. Tem gargalo específico.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 4: COMO DIAGNOSTICAR -->
+<div class="slide">
+  <div class="eyebrow">Diagnóstico rápido</div>
+  <h2 class="headline" style="font-size:clamp(24px,3vw,44px);margin-bottom:8px">Como saber qual é o seu caso</h2>
+  <table class="tbl">
+    <thead><tr><th>Sinal</th><th>Sazonalidade</th><th>Problema único</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>CTR do anúncio</td>
+        <td><span class="tag-green">Estável</span></td>
+        <td><span class="tag-red">Caindo</span></td>
+      </tr>
+      <tr>
+        <td>CPM</td>
+        <td><span class="tag-amber">Subiu em todo mundo</span></td>
+        <td><span class="tag-red">Subiu só em você</span></td>
+      </tr>
+      <tr>
+        <td>Taxa de conversão do site</td>
+        <td><span class="tag-green">Igual ao normal</span></td>
+        <td><span class="tag-red">Caiu junto</span></td>
+      </tr>
+      <tr>
+        <td>Outros no seu nicho</td>
+        <td><span class="tag-amber">Também reclamando</span></td>
+        <td><span class="tag-green">Seguindo normais</span></td>
+      </tr>
+      <tr>
+        <td>Mesmo período ano passado</td>
+        <td><span class="tag-amber">Também foi fraco</span></td>
+        <td><span class="tag-green">Era normal ou bom</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="highlight" style="padding:16px 24px;margin-top:20px">
+    <p style="font-size:15px"><strong>Regra rápida:</strong> CTR estável + CPA subiu = mercado. CTR caiu + CPA subiu = problema seu.</p>
+  </div>
+</div>
+
+<!-- SLIDE 5: CENÁRIO 1 — É SAZONALIDADE -->
+<div class="slide">
+  <div class="eyebrow">Cenário 1 — É sazonalidade</div>
+  <h2 class="headline" style="font-size:clamp(28px,3.5vw,52px)">O mercado não está comprando.<br><span class="accent">Você não resolve isso com mais anúncio.</span></h2>
+  <div class="highlight" style="margin-top:28px">
+    <p>Ficar testando criativo novo, mexendo em campanha, aumentando orçamento — <strong>tudo isso é queimar dinheiro</strong> no fogo. Use outras alavancas.</p>
+  </div>
+</div>
+
+<!-- SLIDE 6: SAZONALIDADE — O QUE FAZER -->
+<div class="slide">
+  <div class="eyebrow">Cenário 1 — Sazonalidade · Plano de ação</div>
+  <h2 class="headline" style="font-size:clamp(24px,3vw,42px);margin-bottom:0">O que FAZER</h2>
+  <ul class="list do">
+    <li><strong>Resgatar a base</strong> — email + WhatsApp pra quem comprou nos últimos 90 dias. Oferta exclusiva para cliente recorrente (frete grátis, brinde, acesso antecipado — não desconto).</li>
+    <li><strong>Criar nova oferta</strong> — não muda o produto, muda o contexto. Kit, bundle, edição especial, "coleção de inverno". Gatilho de tempo real.</li>
+    <li><strong>Investir no orgânico</strong> — o CPM do orgânico é zero. UGC, bastidores, conteúdo educativo. Reels com reposicionamento para esse momento.</li>
+    <li><strong>Reduzir volume de tráfego pago — mas não pausar</strong> — mantém as campanhas funcionando com budget menor. Não reseta o aprendizado para quando o mercado voltar.</li>
+  </ul>
+</div>
+
+<!-- SLIDE 7: SAZONALIDADE — O QUE NÃO FAZER -->
+<div class="slide">
+  <div class="eyebrow">Cenário 1 — Sazonalidade · Armadilhas</div>
+  <h2 class="headline" style="font-size:clamp(24px,3vw,42px);margin-bottom:0">O que NÃO fazer</h2>
+  <ul class="list dont">
+    <li><strong>Testar criativos novos em escala</strong> — você vai gastar na fase de aprendizado num mercado que não está comprando.</li>
+    <li><strong>Mexer na estrutura de campanhas</strong> — reseta o algoritmo. Quando o mercado voltar, você começa do zero.</li>
+    <li><strong>Aumentar orçamento pra compensar o ROAS baixo</strong> — mais spend com o mesmo resultado ruim = mais prejuízo.</li>
+    <li><strong>Entrar em pânico e pausar tudo</strong> — o aprendizado acumulado vai pro lixo. Quem sobrevive com estrutura intacta volta mais forte.</li>
+  </ul>
+  <div class="highlight" style="padding:14px 24px;margin-top:16px">
+    <p style="font-size:15px">Sazonalidade passa. Seu trabalho é <strong>sobreviver bem</strong>, não escalar.</p>
+  </div>
+</div>
+
+<!-- SLIDE 8: CENÁRIO 2 — PROBLEMA ÚNICO -->
+<div class="slide">
+  <div class="eyebrow">Cenário 2 — Problema único</div>
+  <h2 class="headline" style="font-size:clamp(28px,3.5vw,52px)">Se é problema seu,<br><span class="accent">tem solução.</span></h2>
+  <p class="sub" style="margin-top:16px">Mas você precisa saber <strong style="color:#fff">onde está o gargalo</strong> antes de sair mexendo em tudo.<br>Testar tudo ao mesmo tempo é o mesmo erro do pânico.</p>
+</div>
+
+<!-- SLIDE 9: FUNIL DE DIAGNÓSTICO -->
+<div class="slide">
+  <div class="eyebrow">Cenário 2 — Onde está o gargalo?</div>
+  <h2 class="headline" style="font-size:clamp(22px,2.5vw,38px);margin-bottom:8px">Cada queda no funil = um problema diferente</h2>
+  <div class="funnel">
+    <div class="funnel-step">
+      <div class="funnel-label">Impressões → Cliques</div>
+      <div style="flex:1">
+        <div class="funnel-bar" style="background:rgba(99,102,241,.4);width:100%">CTR caindo</div>
+      </div>
+      <div class="funnel-gap" style="color:#6366f1;width:220px;font-size:12px">→ Criativo fraco / audiência saturada</div>
+    </div>
+    <div class="funnel-step">
+      <div class="funnel-label">Cliques → Sessões</div>
+      <div style="flex:1">
+        <div class="funnel-bar" style="background:rgba(168,85,247,.4);width:85%">Perda de cliques</div>
+      </div>
+      <div class="funnel-gap" style="color:#a855f7;width:220px;font-size:12px">→ Página não carrega / URL errada</div>
+    </div>
+    <div class="funnel-step">
+      <div class="funnel-label">Sessões → Checkout</div>
+      <div style="flex:1">
+        <div class="funnel-bar" style="background:rgba(245,158,11,.4);width:70%">Abandono de página</div>
+      </div>
+      <div class="funnel-gap" style="color:#f59e0b;width:220px;font-size:12px">→ Foto/copy ruim, preço, frete oculto</div>
+    </div>
+    <div class="funnel-step">
+      <div class="funnel-label">Checkout → Compra</div>
+      <div style="flex:1">
+        <div class="funnel-bar" style="background:rgba(239,68,68,.4);width:55%">Abandono de carrinho</div>
+      </div>
+      <div class="funnel-gap" style="color:#ef4444;width:220px;font-size:12px">→ Frete surpresa, poucas opções de pagamento</div>
+    </div>
+  </div>
+  <div class="highlight" style="padding:14px 24px;margin-top:20px">
+    <p style="font-size:14px"><strong>Onde a queda é maior no funil? Esse é o gargalo. Resolva esse primeiro.</strong></p>
+  </div>
+</div>
+
+<!-- SLIDE 10: PROBLEMA ÚNICO — O QUE FAZER -->
+<div class="slide">
+  <div class="eyebrow">Cenário 2 — Problema único · Plano de ação</div>
+  <h2 class="headline" style="font-size:clamp(24px,3vw,42px);margin-bottom:0">O que FAZER</h2>
+  <ul class="list do">
+    <li><strong>Encontrar o gargalo primeiro</strong> — não sai testando tudo ao mesmo tempo. Uma variável por vez.</li>
+    <li><strong>Testar novo ângulo de criativo — não novo visual</strong> — muda a narrativa. Falava de benefício? Testa dor. Usava UGC? Testa estático. Usava vídeo longo? Testa 15 segundos.</li>
+    <li><strong>Testar nova oferta</strong> — às vezes o produto está certo, o enquadramento está errado. Muda a forma de apresentar o preço, adiciona garantia ou bônus.</li>
+    <li><strong>Consolidar campanhas</strong> — 10 ad sets de R$50/dia cada = algoritmo que nunca aprende. Consolida pra 3 sets de R$170/dia. Dados concentrados = aprendizado real.</li>
+  </ul>
+</div>
+
+<!-- SLIDE 11: PROBLEMA ÚNICO — O QUE NÃO FAZER -->
+<div class="slide">
+  <div class="eyebrow">Cenário 2 — Problema único · Armadilhas</div>
+  <h2 class="headline" style="font-size:clamp(24px,3vw,42px);margin-bottom:0">O que NÃO fazer</h2>
+  <ul class="list dont">
+    <li><strong>Mudar produto/oferta e criativo ao mesmo tempo</strong> — se melhora, você não sabe o que funcionou. Sempre uma variável.</li>
+    <li><strong>Pausar tudo e criar campanha nova do zero</strong> — o aprendizado acumulado vai pro lixo. Pausa de 7+ dias = reset completo do algoritmo.</li>
+    <li><strong>Olhar resultado de 1-2 dias</strong> — variação diária é ruído, não sinal. Mínimo de 5-7 dias para leitura confiável.</li>
+    <li><strong>Criar mais ad sets fragmentando o orçamento</strong> — fragmentar é o oposto do que o algoritmo precisa para aprender.</li>
+  </ul>
+</div>
+
+<!-- SLIDE 12: RESUMO -->
+<div class="slide">
+  <div class="eyebrow">Resumo</div>
+  <h2 class="headline" style="font-size:clamp(22px,2.5vw,38px);margin-bottom:24px">Dois cenários, duas estratégias opostas</h2>
+  <div class="two-col" style="margin-top:0">
+    <div>
+      <div class="col-title amber">🌊 Sazonalidade</div>
+      <ul class="list do" style="margin-top:0">
+        <li>Resgatar base (email + WhatsApp)</li>
+        <li>Criar oferta nova pra base e topo</li>
+        <li>Investir no orgânico</li>
+        <li>Reduzir spend — não pausar</li>
+      </ul>
+    </div>
+    <div>
+      <div class="col-title purple">🔍 Problema único</div>
+      <ul class="list do" style="margin-top:0">
+        <li>Mapear onde o funil quebra</li>
+        <li>Novo ângulo de criativo (não visual)</li>
+        <li>Testar nova oferta</li>
+        <li>Consolidar ad sets</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 13: FECHAMENTO -->
+<div class="slide slide-title">
+  <div class="eyebrow">Antes da próxima call</div>
+  <p class="quote">Cada um de vocês chega aqui<br>com a resposta para <em>uma pergunta</em>:</p>
+  <div class="divider"></div>
+  <div class="highlight">
+    <p style="font-size:20px">É sazonalidade ou problema meu?<br>Se for problema meu, <strong>onde está o gargalo no funil?</strong></p>
+  </div>
+  <p class="sub" style="margin-top:32px;font-size:14px">Quando o ROAS cai, a primeira pergunta não é "o que mudo?"<br>É "o que está causando isso?" — a resposta muda tudo.</p>
+</div>
+
+</div><!-- /deck -->
+
+<div class="nav" id="nav"></div>
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const nav = document.getElementById('nav');
+const prog = document.getElementById('prog');
+const snum = document.getElementById('snum');
+let cur = 0;
+
+slides.forEach((_,i)=>{
+  const d = document.createElement('div');
+  d.className = 'dot' + (i===0?' active':'');
+  d.onclick = ()=>go(i);
+  nav.appendChild(d);
+});
+
+function go(n){
+  slides[cur].classList.remove('active');
+  nav.children[cur].classList.remove('active');
+  cur = Math.max(0,Math.min(n, slides.length-1));
+  slides[cur].classList.add('active');
+  nav.children[cur].classList.add('active');
+  prog.style.width = ((cur+1)/slides.length*100)+'%';
+  snum.textContent = (cur+1) + ' / ' + slides.length;
+}
+
+go(0);
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'||e.key===' ') go(cur+1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp') go(cur-1);
+});
+
+// Touch support
+let tx=0;
+document.addEventListener('touchstart',e=>tx=e.touches[0].clientX);
+document.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-tx;
+  if(Math.abs(dx)>50) go(cur+(dx<0?1:-1));
+});
+</script>
+</body>
+</html>
