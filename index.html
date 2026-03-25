@@ -129,10 +129,8 @@ input[type=date]{padding:4px 8px;border-radius:5px;border:1px solid rgba(255,255
       <div class="ch-card">
         <div class="ch-icon">🔍</div>
         <div class="ch-name">Google Ads</div>
-        <div class="ch-pending">
-          <span class="badge b-yellow">⏳ Aguardando acesso</span>
-          <span style="font-size:11px">Romulo precisa aceitar o convite</span>
-        </div>
+        <div class="ch-value" id="ch-gads">ARS 388.865</div>
+        <div style="font-size:10px;color:#888">spend 7d · 3 campanhas</div>
       </div>
       <div class="ch-card">
         <div class="ch-icon">🎵</div>
@@ -464,16 +462,20 @@ function renderOverview(fromD,toD){
   const spends=tnE.map(([d])=>sm[d]||0);
   const totRev=revenues.reduce((a,b)=>a+b,0);
   const totOrd=orders.reduce((a,b)=>a+b,0);
-  const totSpend=spends.reduce((a,b)=>a+b,0);
+  const totMetaSpend=spends.reduce((a,b)=>a+b,0);
+  // Google Ads spend pro-rated for selected period
+  const gadsSpend30d=1437637; const gadsSpend7d=388865;
+  const gadsSpend=ovDays<=7?gadsSpend7d:Math.round(gadsSpend30d*(ovDays/30));
+  const totSpend=totMetaSpend+gadsSpend;
   const roas=totSpend>0?totRev/totSpend:0;
   const cpa=totOrd>0?totSpend/totOrd:0;
   const aov=totOrd>0?totRev/totOrd:0;
 
   document.getElementById('kpi-row').innerHTML=`
-    <div class="card"><div class="kpi-label">Spend (Meta)</div><div class="kpi-val">ARS ${fK(totSpend)}</div><div class="kpi-sub">+Google/TikTok em breve</div></div>
+    <div class="card"><div class="kpi-label">Spend Total</div><div class="kpi-val">ARS ${fK(totSpend)}</div><div class="kpi-sub">Meta ARS ${fK(totMetaSpend)} + Google ARS ${fK(gadsSpend)}</div></div>
     <div class="card"><div class="kpi-label">Pedidos</div><div class="kpi-val">${totOrd}</div><div class="kpi-sub">TiendaNube</div></div>
     <div class="card"><div class="kpi-label">Receita</div><div class="kpi-val">ARS ${fK(totRev)}</div><div class="kpi-sub">TiendaNube</div></div>
-    <div class="card"><div class="kpi-label">ROAS Real</div><div class="kpi-val" style="color:${roas>=4.5?'#10b981':roas>=3?'#f59e0b':'#ef4444'}">${roas.toFixed(2)}x</div><div class="kpi-sub">Receita TN ÷ Spend Meta</div></div>
+    <div class="card"><div class="kpi-label">ROAS Real</div><div class="kpi-val" style="color:${roas>=4.5?'#10b981':roas>=3?'#f59e0b':'#ef4444'}">${roas.toFixed(2)}x</div><div class="kpi-sub">Receita TN ÷ Spend Meta+Google</div></div>
     <div class="card"><div class="kpi-label">Ticket Médio</div><div class="kpi-val">ARS ${fK(aov)}</div><div class="kpi-sub">Receita ÷ Pedidos</div></div>
     <div class="card"><div class="kpi-label">CPA Real</div><div class="kpi-val">ARS ${fK(cpa)}</div><div class="kpi-sub">Spend ÷ Pedidos TN</div></div>`;
 
