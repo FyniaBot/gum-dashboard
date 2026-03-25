@@ -499,19 +499,16 @@ function renderOverview(fromD,toD){
   const gadsFiltered = gadsDailyAll.filter(r=>r.date>=gadsFromD&&r.date<=gadsToD);
   const gadsSp = gadsFiltered.reduce((a,r)=>a+r.spend,0);
   const gadsClicks = gadsFiltered.reduce((a,r)=>a+r.clicks,0);
-  // GA4 UTM: transações e receita atribuídas ao Google no período
-  const gadsUtm = (UTM_DAILY.rows||[]).filter(r=>r.date>=gadsFromD&&r.date<=gadsToD&&(r.source||'').toLowerCase().includes('google'));
-  const gadsTx = gadsUtm.reduce((a,r)=>a+(r.transactions||0),0);
-  const gadsRev = gadsUtm.reduce((a,r)=>a+(r.revenue||0),0);
-  const gadsROAS = gadsSp>0 && gadsRev>0 ? (gadsRev/gadsSp).toFixed(2) : '—';
+  // Compras = Google Ads API conversions (bate com Google Ads Manager)
+  const gadsTx = gadsFiltered.reduce((a,r)=>a+r.conversions,0);
   const gadsCPA = gadsTx>0 && gadsSp>0 ? Math.round(gadsSp/gadsTx) : 0;
   document.getElementById('ch-card-gads').innerHTML=`
     <div class="ch-icon">🔍</div>
     <div class="ch-name">Google Ads</div>
     <div class="ch-row"><span class="ch-lbl">Spend</span><span class="ch-val">ARS ${fK(gadsSp)}</span></div>
-    <div class="ch-row"><span class="ch-lbl">Compras (atrib. GA4)</span><span class="ch-val">${gadsTx}</span></div>
-    <div class="ch-row"><span class="ch-lbl">ROAS (GA4÷Spend)</span><span class="ch-val" style="color:#10b981">${gadsROAS}x</span></div>
-    <div class="ch-row"><span class="ch-lbl">CPA atribuído</span><span class="ch-val">${gadsCPA>0?'ARS '+fK(gadsCPA):'—'}</span></div>`;
+    <div class="ch-row"><span class="ch-lbl">Compras (atrib. Google)</span><span class="ch-val">${Math.round(gadsTx)}</span></div>
+    <div class="ch-row"><span class="ch-lbl">CPA atribuído</span><span class="ch-val">${gadsCPA>0?'ARS '+fK(gadsCPA):'—'}</span></div>
+    <div class="ch-row"><span class="ch-lbl">Cliques</span><span class="ch-val">${gadsClicks.toLocaleString('es-AR')}</span></div>`;
 
   // Projeção março
   const mE=Object.entries(TN).filter(([d])=>d>='2026-03-01'&&d<='2026-03-24');
