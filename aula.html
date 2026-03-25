@@ -334,7 +334,144 @@
   </div>
 </div>
 
-<!-- SLIDE 14: FECHAMENTO -->
+<!-- SLIDE 14: BLOCO 2 CAPA -->
+<div class="slide slide-title">
+  <div class="eyebrow">Bloco 2</div>
+  <h1 class="headline"><span class="accent">IA para análise</span><br><span class="white">e decisão</span></h1>
+  <div class="divider"></div>
+  <p class="sub">Como usamos IA para ter clareza de dados em tempo real — e o que isso significa na prática pra qualquer e-commerce.</p>
+</div>
+
+<!-- SLIDE 15: O PROBLEMA DOS DADOS -->
+<div class="slide">
+  <div class="eyebrow">O problema que todo mundo ignora</div>
+  <h2 class="headline" style="font-size:clamp(26px,3.5vw,50px)">O ROAS que a plataforma mostra<br><span class="accent">não é o ROAS do seu negócio.</span></h2>
+  <table class="tbl" style="max-width:820px;margin-top:24px">
+    <thead><tr><th></th><th>Meta Ads diz</th><th>Google Ads diz</th><th style="color:#10b981">Realidade (caixa)</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Receita atribuída</td>
+        <td>R$ 48.000</td>
+        <td>R$ 32.000</td>
+        <td style="color:#10b981;font-weight:700">R$ 52.000</td>
+      </tr>
+      <tr>
+        <td>Investimento</td>
+        <td>R$ 12.000</td>
+        <td>R$ 8.000</td>
+        <td style="color:#10b981;font-weight:700">R$ 20.000 total</td>
+      </tr>
+      <tr>
+        <td>ROAS reportado</td>
+        <td><span class="tag-amber">4.0x</span></td>
+        <td><span class="tag-amber">4.0x</span></td>
+        <td><span class="tag-red">2.6x real</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="highlight" style="margin-top:20px;padding:14px 28px">
+    <p style="font-size:15px">R$28k de receita "fantasma" — a mesma venda contada duas vezes.<br><strong>Você toma decisões de investimento baseado num número errado.</strong></p>
+  </div>
+</div>
+
+<!-- SLIDE 16: O DASHBOARD -->
+<div class="slide">
+  <div class="eyebrow">O que construímos para a GÜM</div>
+  <h2 class="headline" style="font-size:clamp(22px,2.8vw,42px);margin-bottom:20px">Um dashboard que mostra a verdade</h2>
+  <div class="cards cols-3" style="max-width:1050px">
+    <div class="card purple">
+      <div class="icon">🔢</div>
+      <div class="ctitle">ROAS Real</div>
+      <div class="ctext">Receita TiendaNube ÷ Spend Meta + Google + TikTok. Não o número da plataforma.</div>
+    </div>
+    <div class="card purple">
+      <div class="icon">🔽</div>
+      <div class="ctitle">Funil Completo</div>
+      <div class="ctext">Impressões → Cliques → Sessões GA4 → Checkouts → Compras reais. Onde está o gargalo.</div>
+    </div>
+    <div class="card purple">
+      <div class="icon">🎨</div>
+      <div class="ctitle">Performance por Criativo</div>
+      <div class="ctext">Qual criativo realmente converte na loja — não só o que tem CTR alto.</div>
+    </div>
+    <div class="card green">
+      <div class="icon">📍</div>
+      <div class="ctitle">Origem do Tráfego</div>
+      <div class="ctext">Meta, Google, TikTok, orgânico, direto — quanto cada canal realmente contribui.</div>
+    </div>
+    <div class="card green">
+      <div class="icon">🤖</div>
+      <div class="ctitle">Inteligência Semanal</div>
+      <div class="ctext">IA analisa os dados toda semana e entrega recomendações prontas pra ação.</div>
+    </div>
+    <div class="card green">
+      <div class="icon">⚡</div>
+      <div class="ctitle">Atualização Automática</div>
+      <div class="ctext">Dados puxados direto das APIs toda madrugada. Zero trabalho manual.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 17: COMO FOI CONSTRUÍDO -->
+<div class="slide">
+  <div class="eyebrow">Como funciona por baixo</div>
+  <h2 class="headline" style="font-size:clamp(22px,2.8vw,40px);margin-bottom:24px">O stack completo — custo real: ~$20/mês</h2>
+  <div class="cards cols-2" style="max-width:900px;margin-top:0">
+    <div class="card purple">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <div style="font-size:24px">🧠</div>
+        <div>
+          <div class="ctitle" style="margin-bottom:2px">OpenClaw + Claude</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.35);font-weight:600;letter-spacing:1px">A INTELIGÊNCIA</div>
+        </div>
+      </div>
+      <div class="ctext">Plataforma de IA com memória, múltiplos agentes especializados (marketing, dados, produto) e acesso a ferramentas. Claude é o modelo que alimenta tudo. ~$20/mês.</div>
+    </div>
+    <div class="card amber">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <div style="font-size:24px">⚙️</div>
+        <div>
+          <div class="ctitle" style="margin-bottom:2px">n8n</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.35);font-weight:600;letter-spacing:1px">A AUTOMAÇÃO</div>
+        </div>
+      </div>
+      <div class="ctext">Puxa dados das APIs (Meta, Google, TiendaNube, GA4) todo dia automaticamente e joga numa planilha. Nenhum trabalho manual. Self-hosted, gratuito.</div>
+    </div>
+    <div class="card green">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <div style="font-size:24px">📊</div>
+        <div>
+          <div class="ctitle" style="margin-bottom:2px">Google Sheets + Python</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.35);font-weight:600;letter-spacing:1px">O PROCESSAMENTO</div>
+        </div>
+      </div>
+      <div class="ctext">Planilha armazena os dados. Python processa e gera o dashboard em HTML. Gratuito.</div>
+    </div>
+    <div class="card" style="border-color:rgba(255,255,255,.1)">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+        <div style="font-size:24px">🌐</div>
+        <div>
+          <div class="ctitle" style="margin-bottom:2px">GitHub Pages</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.35);font-weight:600;letter-spacing:1px">A HOSPEDAGEM</div>
+        </div>
+      </div>
+      <div class="ctext">Dashboard publicado como página HTML. Acessível de qualquer lugar, sem servidor. 100% gratuito.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDE 18: DISCUSSÃO BLOCO 2 -->
+<div class="slide slide-title">
+  <div class="eyebrow">Momento da turma — Bloco 2</div>
+  <h2 class="headline" style="font-size:clamp(26px,3.5vw,50px)">Dúvidas sobre<br><span class="accent">dados e IA?</span></h2>
+  <div class="divider"></div>
+  <div class="highlight" style="margin-top:12px">
+    <p style="font-size:17px">Vocês já têm algum painel de dados hoje?<br><strong>O que vocês gostariam de enxergar que ainda não conseguem?</strong></p>
+  </div>
+  <p class="sub" style="margin-top:24px;font-size:14px">Em aulas futuras podemos aprofundar como montar isso pra vocês.</p>
+</div>
+
+<!-- SLIDE 19: FECHAMENTO -->
 <div class="slide slide-title">
   <div class="eyebrow">Antes da próxima call</div>
   <p class="quote">Cada um de vocês chega aqui<br>com a resposta para <em>uma pergunta</em>:</p>
