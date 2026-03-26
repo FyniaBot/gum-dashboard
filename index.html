@@ -549,6 +549,9 @@ function setFnPeriod(days,btn){
   fnDays=days;
   document.querySelectorAll('#tab-funnel .fbtn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  const allDates=FUNNEL.map(r=>r.date).sort();
+  const slc=allDates.slice(-days);
+  if(slc.length){const f=slc[0].slice(5).replace('-','/');const t=slc[slc.length-1].slice(5).replace('-','/');btn.textContent=days+' dias ('+f+' → '+t+')';}
   renderFunnel();
 }
 function applyFnCustom(){renderFunnel(document.getElementById('fn-from').value,document.getElementById('fn-to').value);}
@@ -799,11 +802,15 @@ let crFromDate='2026-02-23',crToDate='2026-03-23';
 function setCrPreset(days,btn){
   document.querySelectorAll('#tab-creatives .fbtn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  const to=new Date('2026-03-23'),from=new Date(to);from.setDate(from.getDate()-(days-1));
+  const allCrDates=[...new Set(CR_DAILY.map(r=>r.date_start||r.date))].sort();
+  const lastCr=allCrDates[allCrDates.length-1]||'2026-03-26';
+  const to=new Date(lastCr),from=new Date(to);from.setDate(from.getDate()-(days-1));
   const fmt=d=>d.toISOString().slice(0,10);
   crFromDate=fmt(from);crToDate=fmt(to);
   document.getElementById('cr-from').value=crFromDate;
   document.getElementById('cr-to').value=crToDate;
+  const f=crFromDate.slice(5).replace('-','/');const t=crToDate.slice(5).replace('-','/');
+  btn.textContent=days+' dias ('+f+' → '+t+')';
   renderCr();
 }
 function applyCrCustom(){
@@ -955,10 +962,14 @@ function renderUtmTable(){
 function setUtmPeriod(days,btn){
   document.querySelectorAll('#tab-utm .fbtn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  const to=new Date('2026-03-24'),from=new Date(to);from.setDate(from.getDate()-(days-1));
+  const allUtmDates=[...new Set(UTM_DAILY.map(r=>r.date))].sort();
+  const lastUtm=allUtmDates[allUtmDates.length-1]||'2026-03-24';
+  const to=new Date(lastUtm),from=new Date(to);from.setDate(from.getDate()-(days-1));
   const fmt=d=>d.toISOString().slice(0,10);
   document.getElementById('utm-from').value=fmt(from);
   document.getElementById('utm-to').value=fmt(to);
+  const f=fmt(from).slice(5).replace('-','/');const t=fmt(to).slice(5).replace('-','/');
+  btn.textContent=days+' dias ('+f+' → '+t+')';
   renderUtmTable();
 }
 function applyUtmCustom(){renderUtmTable();}
