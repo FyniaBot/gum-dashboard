@@ -1,0 +1,75 @@
+name: QA Validate Dashboard
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check DATA_CUTOFF exists and is not empty
+        run: |
+          if ! grep -q "DATA_CUTOFF=" index.html; then
+            echo "❌ DATA_CUTOFF não encontrado no index.html"
+            exit 1
+          fi
+          CUTOFF=$(grep -o "DATA_CUTOFF='[^']*'" index.html | head -1 | grep -o "'[^']*'" | tr -d "'")
+          echo "✅ DATA_CUTOFF = $CUTOFF"
+          if [ -z "$CUTOFF" ]; then
+            echo "❌ DATA_CUTOFF está vazio"
+            exit 1
+          fi
+
+      - name: Check DATA_CUTOFF is not hardcoded to old date
+        run: |
+          CUTOFF=$(grep -o "DATA_CUTOFF='[^']*'" index.html | head -1 | grep -o "'[^']*'" | tr -d "'")
+          TODAY=$(date +%Y-%m-%d)
+          CUTOFF_TS=$(date -d "$CUTOFF" +%s 2>/dev/null || date -j -f "%Y-%m-%d" "$CUTOFF" +%s 2>/dev/null)
+          TODAY_TS=$(date +%s)
+          DIFF=$(( (TODAY_TS - CUTOFF_TS) / 86400 ))
+          echo "DATA_CUTOFF = $CUTOFF | Hoje = $TODAY | Diferença = $DIFF dias"
+          if [ "$DIFF" -gt 5 ]; then
+            echo "❌ DATA_CUTOFF ($CUTOFF) está mais de 5 dias no passado em relação a hoje ($TODAY). Verifique se foi atualizado!"
+            exit 1
+          fi
+          echo "✅ DATA_CUTOFF dentro do prazo aceitável"
+
+      - name: Check all tabs exist in HTML
+        run: |
+          TABS=("funil" "criativos" "resumo")
+          for TAB in "${TABS[@]}"; do
+            if ! grep -qi "$TAB" index.html; then
+              echo "❌ Aba '$TAB' não encontrada no HTML"
+              exit 1
+            fi
+            echo "✅ Aba '$TAB' encontrada"
+          done
+
+      - name: Check HTML is valid (basic)
+        run: |
+          if ! grep -q "</html>" index.html; then
+            echo "❌ HTML parece incompleto (sem </html>)"
+            exit 1
+          fi
+          echo "✅ HTML parece completo"
+
+      - name: Check no hardcoded credentials
+        run: |
+          PATTERNS=("rk_live_" "sk_live_" "EAAa" "Bearer ey")
+          for PATTERN in "${PATTERNS[@]}"; do
+            if grep -q "$PATTERN" index.html; then
+              echo "❌ Possível credencial hardcoded encontrada: $PATTERN"
+              exit 1
+            fi
+          done
+          echo "✅ Nenhuma credencial hardcoded detectada"
+
+      - name: Summary
+        run: |
+          echo ""
+          echo "✅✅✅ Todas as validações passaram. Deploy autorizado."
